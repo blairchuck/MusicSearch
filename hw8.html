@@ -1,0 +1,433 @@
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<head><title>Homework8</title>
+<style type="text/css">
+	  body { font-family: Arial, Helvetica, sans-serif; font-size: 12pt;}
+	  th{text-align:center;vertical-align:center;} 
+	  td{height:100px;text-align:center;vertical-align:center;}
+	  table.main { width:500px;padding: 10px 5px 0px 5px; border:4px solid gray;}
+      table.result { padding: 0px 0px 0px 0px; border-style: double; border-color: gray;width:100%;}
+	  select { font-size: 12pt }
+	  #fb{
+	  background-color:transparent;
+	  background-image:url('images/facebook.png');
+	  color:white;
+     }
+    </style>
+
+<script LANGUAGE=javascript>
+var req;
+var url;
+var search_title_input;
+var search_type;
+var doc;
+function check(){
+if(document.getElementsByName('title_input')[0].value=="")
+{
+alert("Please enter something in the search box!");
+return false;
+}
+else if(document.getElementsByName('type')[0].value==null)
+{
+alert("Please choose a title type!");
+return false;
+}
+else
+return true;
+}
+
+function loadXMLdoc(){
+ req = false;
+    // branch for native XMLHttpRequest object
+    if(window.XMLHttpRequest) {
+          try {   req = new XMLHttpRequest();
+        } catch(e) {  req = false;
+        }
+    // branch for IE/Windows ActiveX version
+    } else if(window.ActiveXObject) {
+          try {
+          req = new ActiveXObject("Msxml2.XMLHTTP");
+          } catch(e) {
+          try {  req = new ActiveXObject("Microsoft.XMLHTTP");
+          } catch(e) {   req = false;
+          }
+          }
+} 
+if(req) {
+//This code instantiates an XmlHttpRequest object depending upon the browser
+search_title_input=document.getElementsByName("title_input")[0].value;
+search_type=document.getElementsByName("type")[0].value;
+url="MusicSearch?";
+url+="title_input=" + search_title_input + "&type=" + search_type;
+req.open("GET", encodeURI(url), true);
+req.onreadystatechange = processReqChange; 
+req.setRequestHeader("Connection", "Close"); 
+req.setRequestHeader("Method", "GET" + url + "HTTP/1.1");
+req.send("");
+
+}
+}
+
+
+function processReqChange() {
+    // only if req shows "loaded"
+   
+    if (req.readyState == 4) {
+        // only if "OK"
+        if (req.status == 200) {
+            // processing statements req.responseText
+            // and req.responseXML go here...
+            doc = eval('(' + req.responseText + ')');
+            var search_result=doc.results.total;
+             search_title_input=document.getElementsByName("title_input")[0].value;
+             search_type=document.getElementsByName("type")[0].value;
+            document.getElementById("result").innerHTML = "";
+           
+            var text_html = "";
+            if(search_result<=0){
+            text_html +="<center><h3 style='color:blue'>"+search_title_input+" of "+search_type+"</h3><center>\n";
+            
+            text_html +="<center><h4 style='color:blue'>No Discography Found!</h4><center>\n";
+            document.getElementById("result").innerHTML = text_html;
+            
+            }
+            else{
+            if (search_type=="artists"){
+            if (search_result>5){
+ search_result=5;
+ }
+ text_html +="<center><h3 style='color:blue'>Displaying "+search_result+" results for "+search_title_input+ " of "+search_type+"</h3><center>";
+ text_html +="<table border='1' style='text-align:center'><tr><th>Cover</th><th>Name</th><th>Genre(s)</th><th>Year(s)</th><th>Details</th><th>Post To Facebook</th></tr>";
+ 
+ if(search_result==1){
+ text_html +="<tr><td><img src='";
+ text_html +=String(doc.results.result.cover);
+ text_html +="' alt='N/A'/></td><td>";
+ text_html +=String(doc.results.result.name);
+ text_html +="</td><td>";
+ text_html +=String(doc.results.result.genre);
+ text_html +="</td><td>";
+ text_html +=String(doc.results.result.year);
+ text_html +="</td><td><a href='";
+ text_html +=String(doc.results.result.details);
+ text_html +="'>details</a></td>";		
+ text_html +="<td><input type='button' id='fb' value='facebook' onClick='postToFeedArtists()'/></td></tr>\n";
+ }
+ else{
+ 
+  for (var i=0;i<search_result;i++){
+ text_html +="<tr><td><img src='";
+ text_html +=String(doc.results.result[i].cover);
+ text_html +="' alt='N/A'/></td><td>";
+ text_html +=String(doc.results.result[i].name);
+ text_html +="</td><td>";
+ text_html +=String(doc.results.result[i].genre);
+ text_html +="</td><td>";
+ text_html +=String(doc.results.result[i].year);
+ text_html +="</td><td><a href='";
+ text_html +=String(doc.results.result[i].details);
+ text_html +="'>details</a></td>";		
+ text_html +="<td><input type='button' id='fb' value='facebook' onClick='postToFeedArtists("+i+")'/></td></tr>\n";
+ }
+ }
+ text_html +="</table>";
+          }
+         if (search_type=="albums"){
+          if (search_result>5){
+ search_result=5;
+ }
+ text_html +="<center><h3 style='color:blue'>Displaying "+search_result+" results for "+search_title_input+ " of "+search_type+"</h3><center>";
+ text_html +="<table border='1' style='text-align:center'><tr><th>Cover</th><th>Title</th><th>Artist</th><th>Genre(s)</th><th>Year(s)</th><th>Details</th><th>Post To Facebook</th></tr> ";
+ if(search_result==1){
+  text_html +="<tr><td><img src='";
+ text_html +=String(doc.results.result.cover);
+ text_html +="' alt='N/A'/></td><td>";
+ text_html +=String(doc.results.result.title);
+ text_html +="</td><td>";
+ text_html +=String(doc.results.result.artist);
+ text_html +="</td><td>";
+ text_html +=String(doc.results.result.genre);
+ text_html +="</td><td>";
+ text_html +=String(doc.results.result.year);
+ text_html +="</td><td><a href='";
+ text_html +=String(doc.results.result.details);
+ text_html +="'>details</a></td>";		
+ text_html +="<td><input type='button' id='fb' value='facebook' onClick='postToFeedAlbums()'/></td></tr>\n";
+ }
+ else{
+ 
+  for (var i=0;i<search_result;i++){
+ text_html +="<tr><td><img src='";
+ text_html +=String(doc.results.result[i].cover);
+ text_html +="' alt='N/A'/></td><td>";
+ text_html +=String(doc.results.result[i].title);
+ text_html +="</td><td>";
+ text_html +=String(doc.results.result[i].artist);
+ text_html +="</td><td>";
+ text_html +=String(doc.results.result[i].genre);
+ text_html +="</td><td>";
+ text_html +=String(doc.results.result[i].year);
+ text_html +="</td><td><a href='";
+ text_html +=String(doc.results.result[i].details);
+ text_html +="'>details</a></td>";		
+ text_html +="<td><input type='button' id='fb' value='facebook' onClick='postToFeedAlbums("+i+")'/></td></tr>\n";
+ }
+ }
+ text_html +="</table>";
+          }  
+           if(search_type=="songs"){
+           if (search_result>5){
+ search_result=5;
+ }
+ text_html +="<center><h3 style='color:blue'>Displaying "+search_result+" results for "+search_title_input+" of "+search_type+"</h3><center>";
+ text_html +="<table border='1' style='text-align:center'><tr><th>Sample</th><th>Title</th><th>Performer(s)</th><th>Composer(s)</th><th>Details</th><th>Post To Facebook</th></tr>";
+ if(search_result==1){
+ if(doc.results.result.sample=="N/A"){
+  text_html +="<tr><td>N/A</td><td>";
+  }
+  else{
+ text_html +="<tr><td><a href='";
+ text_html +=String(doc.results.result.sample);
+ text_html +="'>sample</a></td><td>";
+}
+ 
+ text_html +=String(doc.results.result.title);
+ text_html +="</td><td>";
+ text_html +=String(doc.results.result.performer);
+ text_html +="</td><td>";
+ text_html +=String(doc.results.result.composer);
+ text_html +="</td><td><a href='";
+ text_html +=String(doc.results.result.details);
+ text_html +="'>details</a></td>";		
+ text_html +="<td><input type='button' id='fb' value='facebook' onClick='postToFeedSongs()'/></td></tr>\n";
+ }
+   else{
+  for (var i=0;i<search_result;i++){
+   
+  if(doc.results.result[i].sample=="N/A"){
+  text_html +="<tr><td>N/A</td><td>";
+  }
+  else{
+ text_html +="<tr><td><a href='";
+ text_html +=String(doc.results.result[i].sample);
+ text_html +="'>sample</a></td><td>";
+}
+ 
+ text_html +=String(doc.results.result[i].title);
+ text_html +="</td><td>";
+ text_html +=String(doc.results.result[i].performer);
+ text_html +="</td><td>";
+ text_html +=String(doc.results.result[i].composer);
+ text_html +="</td><td><a href='";
+ text_html +=String(doc.results.result[i].details);
+ text_html +="'>details</a></td>";		
+ text_html +="<td><input type='button' id='fb' value='facebook' onClick='postToFeedSongs("+i+")'/></td></tr>\n";
+ }
+ }
+  text_html +="</table>";
+          }  
+          
+ document.getElementById("result").innerHTML = text_html; 
+         }
+        } else {
+alert("There was a problem retrieving the XML data:\n"
+   +   req.statusText);
+} 
+}
+
+}
+</script>
+</head> 
+
+<body>       
+<div id="fb-root"></div>
+<script src="//connect.facebook.net/en_US/all.js"></script>
+<script>
+ 
+    // init the FB JS SDK
+    FB.init({
+      appId      : '135771516608351',                        // App ID from the app dashboard
+      channelUrl : '//cs-server.usc.edu:28852/myapp/Channel.html', // Channel file for x-domain comms
+      status     : true,                                 // Check Facebook Login status
+      cookie     : true, // enable cookies to allow the server to access the session
+      xfbml      : true                                  // Look for social plugins on the page
+    });
+
+    // Additional initialization code such as adding Event Listeners goes here
+   
+  
+
+  // Load the SDK asynchronously
+  
+  function postToFeedArtists(i) {
+        // calling the API ...
+        var obj = {
+          method: 'feed',
+          link: doc.results.result[i].details,
+          name: doc.results.result[i].name,
+          caption: 'I like '+doc.results.result[i].name+' who is active since '+doc.results.result[i].year,
+          media: {
+                                type: 'image',
+                                href: doc.results.result[i].details,
+                                src: doc.results.result[i].cover,
+                                },
+          description: 'Genre of Music is: '+doc.results.result[i].genre,
+		  properties: {'Look at details':{text:'here', href:doc.results.result[i].details+'here'}},
+        };
+        
+	 	function callback(response) {
+	       if (response && response.post_id) {
+			   alert('Post was published successfully.');
+			} else {
+			   alert('Post was not published.');
+			}
+	    }
+        FB.ui(obj,callback);
+      }
+      function postToFeedArtists() {
+        // calling the API ...
+        var obj = {
+          method: 'feed',
+          link: doc.results.result.details,
+          name: doc.results.result.name,
+          caption: 'I like '+doc.results.result.name+' who is active since '+doc.results.result.year,
+          media: {
+                                type: 'image',
+                                href: doc.results.result.details,
+                                src: doc.results.result.cover,
+                                },
+          description: 'Genre of Music is: '+doc.results.result.genre,
+		  properties: {'Look at details':{text:'here', href:doc.results.result.details+'here'}},
+        };
+        
+	 	function callback(response) {
+	       if (response && response.post_id) {
+			   alert('Post was published successfully.');
+			} else {
+			   alert('Post was not published.');
+			}
+	    }
+        FB.ui(obj,callback);
+      }
+     function postToFeedAlbums(i) {
+        // calling the API ...
+        var obj = {
+          method: 'feed',
+          link: doc.results.result[i].details,
+          name: doc.results.result[i].title,
+          caption: 'I like '+doc.results.result[i].title+' released in '+doc.results.result[i].year,
+          media: {
+                                type: 'image',
+                                href: doc.results.result[i].details,
+                                src: doc.results.result[i].cover,
+                                },
+          description: ' Artist: '+doc.results.result[i].artist+' Genre: '+doc.results.result[i].genre,
+		  properties: {'Look at details':{text:'here', href:doc.results.result[i].details+'here'}},
+        };
+        
+	 	function callback(response) {
+	       if (response && response.post_id) {
+			   alert('Post was published successfully.');
+			} else {
+			   alert('Post was not published.');
+			}
+	    }
+        FB.ui(obj,callback);
+      }
+      function postToFeedAlbums() {
+        // calling the API ...
+        var obj = {
+          method: 'feed',
+          link: doc.results.result.details,
+          name: doc.results.result.title,
+          caption: 'I like '+doc.results.result.title+' released in '+doc.results.result.year,
+          media: {
+                                type: 'image',
+                                href: doc.results.result.details,
+                                src: doc.results.result.cover,
+                                },
+          description: ' Artist: '+doc.results.result.artist+' Genre: '+doc.results.result.genre,
+		  properties: {'Look at details':{text:'here', href:doc.results.result.details+'here'}},
+        };
+        
+	 	function callback(response) {
+	       if (response && response.post_id) {
+			   alert('Post was published successfully.');
+			} else {
+			   alert('Post was not published.');
+			}
+	    }
+        FB.ui(obj,callback);
+      }
+      function postToFeedSongs(i) {
+        // calling the API ...
+        var obj = {
+          method: 'feed',
+          link: doc.results.result[i].details,
+          name: doc.results.result[i].title,
+          caption: 'I like '+doc.results.result[i].title+' composed by '+doc.results.result[i].composer,
+          media: {
+                                type: 'video',
+                                href: doc.results.result[i].details,
+                                src: doc.results.result[i].sample,
+                                },
+          description: ' Performer: '+doc.results.result[i].performer,
+		  properties: {'Look at details':{text:'here', href:doc.results.result[i].details+'here'}},
+        };
+        
+	 	function callback(response) {
+	       if (response && response.post_id) {
+			   alert('Post was published successfully.');
+			} else {
+			   alert('Post was not published.');
+			}
+	    }
+        FB.ui(obj,callback);
+      }
+      function postToFeedSongs() {
+        // calling the API ...
+        var obj = {
+          method: 'feed',
+          link: doc.results.result.details,
+          name: doc.results.result.title,
+          caption: 'I like '+doc.results.result.title+' composed by '+doc.results.result.composer,
+          media: {
+                                type: 'video',
+                                href: doc.results.result.details,
+                                src: doc.results.result.sample,
+                                },
+          description: ' Performer: '+doc.results.result.performer,
+		  properties: {'Look at details':{text:'here', href:doc.results.result.details+'here'}},
+        };
+        
+	 	function callback(response) {
+	       if (response && response.post_id) {
+			   alert('Post was published successfully.');
+			} else {
+			   alert('Post was not published.');
+			}
+	    }
+        FB.ui(obj,callback);
+      }
+</script>
+
+<H2 style="text-align:center;color:blue">Discography Search</H2>
+<table class="main"  align="center" frame="box" cellspacing="5">
+<tr><td style="color:blue;text-align:center">Title:</td><td>
+<input type="text" name="title_input" value=""/>
+</td></tr>
+<tr><td style="text-align:center;color:blue">Type:</td><td>
+<SELECT name="type">
+<OPTION selected=selected value="artists">Artists</option>
+<OPTION value="albums">Albums</option>
+<OPTION value="songs">Songs</option>
+</SELECT></td></tr> 
+<tr><td style="text-align:center" colspan="2" >
+<input type="submit" value="Search" onclick="if(check()) loadXMLdoc();"/>
+</td></tr>
+</table>
+<div id="result">
+</div>
+<noscript/>
+</body>
+</html>
